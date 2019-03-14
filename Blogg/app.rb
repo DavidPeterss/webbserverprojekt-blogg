@@ -11,8 +11,6 @@ get('/') do
 end
 
 get('/loggedin') do
-    bloggPosts = db.execute("SELECT * FROM bloggposts")
-    bloggPosts = bloggPosts.reverse
     slim(:loggedin)
 end
 
@@ -24,23 +22,22 @@ get('/failed') do
     slim(:failed)
 end
 
-get('/posts') do
-    slim(:posts,locals:{bloggPosts:bloggPosts})
-end
+
 
 post('/login') do
     db = SQLite3::Database.new("db/användare.db")
     db.results_as_hash = true
-    user_password = db.execute("SELECT Id, Password FROM users WHERE Username = ?", params["username"])
-    hashed_pass = BCrypt::Password.new(user_password[0]["Password"])
+    result = db.execute("SELECT Id, Password FROM users WHERE Username = ?", params["username"])
+    user = result.first
+    hashed_pass = BCrypt::Password.new(user["Password"])
     
     if hashed_pass == params["password"]
-         session[:user] = hashed_pass
+         session[:username] = params["username"]
+         session[:userId] = user["Id"]
          
     else
         redirect('/failed')
     end
-    session[:userId] = db.execute("SELECT Id FROM users WHERE Username = ?", params["username"])
     redirect('/loggedin')
 end
 
@@ -53,9 +50,17 @@ post('/register') do
     redirect('/')  
 end
 
+
+get('/posts') do
+    db = SQLite3::Database.new("db/användare.db")
+    db.results_as_hash = true
+    bloggPosts = db.execute("SELECT * FROM bloggposts ORDER BY TimeStamp DESC LIMIT 10")
+    slim(:posts, locals:{bloggPosts:bloggPosts})
+end
+
 post('/text') do
     db = SQLite3::Database.new("db/användare.db")
-    db.execute("INSERT INTO bloggposts(Posts, Header, Id) VALUES(?, ?, ?)", params["bloggpost"], params["rubrik"], session[:userId])
-    redirect('/posts')
+    db.execute("INSERT INTO bloggposts(Posts, Header, UserId) VALUES(?, ?, ?)", params["bloggpost"], params["rubrik"], session[:userId])
+    redirect('/loggedin')
 end
 
