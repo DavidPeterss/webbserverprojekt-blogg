@@ -29,9 +29,14 @@ post('/login') do
     db.results_as_hash = true
     result = db.execute("SELECT Id, Password FROM users WHERE Username = ?", params["username"])
     user = result.first
+
+    if user == nil
+        redirect('/failed')
+    end
+    
     hashed_pass = BCrypt::Password.new(user["Password"])
     
-    if hashed_pass == params["password"]
+    if hashed_pass == params["password"] 
          session[:username] = params["username"]
          session[:userId] = user["Id"]
          
@@ -54,8 +59,8 @@ end
 get('/posts') do
     db = SQLite3::Database.new("db/användare.db")
     db.results_as_hash = true
-    @bloggPosts = db.execute("SELECT * FROM bloggposts ORDER BY TimeStamp DESC LIMIT 5")
-    slim(:posts, locals:{bloggPosts:bloggPosts})
+    @bloggPosts = db.execute("SELECT * FROM bloggposts ORDER BY TimeStamp DESC LIMIT 10")
+    slim(:posts)
 end
 
 post('/text') do

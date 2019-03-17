@@ -4,8 +4,12 @@ h1 Here are poztz
 form action="/text" method="POST"
     input type="text" placeholder="Header" name="rubrik"
     input type="text" placeholder="Whats on your mind today? fidget" name="bloggpost"
-    button type="submit" value="Publish"
+    button type="submit" value="Publish" Posta
     
+a href="/loggedin"Hem
+
+
 -@bloggPosts.each do |posts|
-    h2 = posts(Header)
-    p = posts(Posts)
+    h2 = posts['Header']
+    p = posts['Posts']
+    p = posts['Timestamp']
