@@ -54,13 +54,13 @@ end
 get('/posts') do
     db = SQLite3::Database.new("db/användare.db")
     db.results_as_hash = true
-    bloggPosts = db.execute("SELECT * FROM bloggposts ORDER BY TimeStamp DESC LIMIT 10")
+    @bloggPosts = db.execute("SELECT * FROM bloggposts ORDER BY TimeStamp DESC LIMIT 5")
     slim(:posts, locals:{bloggPosts:bloggPosts})
 end
 
 post('/text') do
     db = SQLite3::Database.new("db/användare.db")
     db.execute("INSERT INTO bloggposts(Posts, Header, UserId) VALUES(?, ?, ?)", params["bloggpost"], params["rubrik"], session[:userId])
-    redirect('/loggedin')
+    redirect('/posts')
 end
 
